@@ -15,7 +15,7 @@ public class GetProductQueryHandler : IQueryHandler<GetProductQuery, ProductDto>
 
     public async Task<Result<ProductDto>> Handle(GetProductQuery request, CancellationToken cancellationToken)
     {
-        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
+        var product = await _productRepository.GetProductWithReviewsAsync(request.Id, cancellationToken);
 
         if (product == null)
         {
@@ -27,10 +27,22 @@ public class GetProductQueryHandler : IQueryHandler<GetProductQuery, ProductDto>
             Id = product.Id,
             Name = product.Name,
             Description = product.Description,
+            Sku = product.Sku,
             Price = product.Price,
             Stock = product.Stock,
             Status = product.Status.ToString(),
-            CreatedAt = product.CreatedAt
+            Category = product.Category,
+            LastRestockedAt = product.LastRestockedAt,
+            CreatedAt = product.CreatedAt,
+            UpdatedAt = product.UpdatedAt,
+            Reviews = product.Reviews.Select(r => new ProductReviewDto
+            {
+                Id = r.Id,
+                ReviewerName = r.ReviewerName,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt
+            }).ToList()
         };
 
         return Result<ProductDto>.Success(productDto);
